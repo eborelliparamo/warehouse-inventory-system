@@ -1,23 +1,24 @@
-﻿namespace Warehouse.Domain.Inventory
+﻿using Warehouse.Domain.ValueObjects;
+
+namespace Warehouse.Domain.Inventory
 {
     public sealed class InventoryItem
     {
         public Guid Id { get; private set; }
         public string Sku { get; private set; } = default!;
         public string Name { get; private set; } = default!;
-        public int TotalQuantity { get; private set; }
+        public InventoryQuantity TotalQuantity { get; private set; } = InventoryQuantity.Zero;
 
         private InventoryItem() { }
-
 
         public static InventoryItem Create(string sku, string name)
         {
             if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU is required");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required");
-            return new InventoryItem { Id = Guid.NewGuid(), Sku = sku.Trim(), Name = name.Trim(), TotalQuantity = 0 };
+            return new InventoryItem { Id = Guid.NewGuid(), Sku = sku.Trim(), Name = name.Trim(), TotalQuantity = InventoryQuantity.Zero };
         }
 
-        public void RegisterIncoming(int qty) { if (qty <= 0) throw new ArgumentOutOfRangeException(nameof(qty)); TotalQuantity += qty; }
-        public void RegisterOutgoing(int qty) { if (qty <= 0) throw new ArgumentOutOfRangeException(nameof(qty)); TotalQuantity -= qty; }
+        public void RegisterIncoming(MovementQuantity qty) { TotalQuantity += qty; }
+        public void RegisterOutgoing(MovementQuantity qty) { TotalQuantity -= qty; }
     }
 }

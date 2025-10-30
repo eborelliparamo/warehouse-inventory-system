@@ -1,5 +1,6 @@
 ﻿using Warehouse.Application.Cqrs.Abstractions;
 using Warehouse.Application.Ports.Inventory;
+using Warehouse.Domain.ValueObjects;
 
 namespace Warehouse.Application.UseCases.Inventory.RegisterIncomingStock
 {
