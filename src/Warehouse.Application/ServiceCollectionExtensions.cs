@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Warehouse.Application.Cqrs;
 using Warehouse.Application.Cqrs.Abstractions;
 using Warehouse.Application.UseCases.Inventory.CreateItem;
 using Warehouse.Application.UseCases.Inventory.Dtos;

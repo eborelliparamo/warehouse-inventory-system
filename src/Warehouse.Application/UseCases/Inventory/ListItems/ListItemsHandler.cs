@@ -1,6 +1,6 @@
-﻿using Warehouse.Application.Abstractions.Inventory;
-using Warehouse.Application.Cqrs.Abstractions;
+﻿using Warehouse.Application.Cqrs.Abstractions;
 using Warehouse.Application.UseCases.Inventory.Dtos;
+using Warehouse.Domain.Abstractions.Inventory;
 using Warehouse.Domain.Inventory;
 
 namespace Warehouse.Application.UseCases.Inventory.ListItems
@@ -9,7 +9,7 @@ namespace Warehouse.Application.UseCases.Inventory.ListItems
     {
         public Task<IReadOnlyList<ItemListDto>> Handle(ListItemsQuery query, CancellationToken ct)
                     => read.ListAsync(
-            filter: null, 
+            filter: null,
             projector: static (InventoryItem x) => new ItemListDto(x.Sku, x.Name, x.TotalQuantity),
             orderBy: (x => x.Sku, desc: false),
             ct);

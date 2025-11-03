@@ -11,7 +11,7 @@ namespace Warehouse.Domain.Inventory
 
         private InventoryItem() { }
 
-        public static InventoryItem Create(Sku sku, string name)
+        public static InventoryItem CreateOrThrow(Sku sku, string name)
         {
             if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU is required");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required");

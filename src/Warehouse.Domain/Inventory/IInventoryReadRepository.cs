@@ -2,7 +2,7 @@
 using Warehouse.Domain.Inventory;
 using Warehouse.Domain.ValueObjects;
 
-namespace Warehouse.Application.Abstractions.Inventory
+namespace Warehouse.Domain.Abstractions.Inventory
 {
     public interface IInventoryReadRepository
     {

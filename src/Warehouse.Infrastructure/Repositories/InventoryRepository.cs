@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using Warehouse.Application.Abstractions.Inventory;
+using Warehouse.Domain.Abstractions.Inventory;
 using Warehouse.Domain.Inventory;
 using Warehouse.Domain.ValueObjects;
 using Warehouse.Infrastructure.Data;
@@ -33,19 +33,19 @@ namespace Warehouse.Infrastructure.Repositories
             Expression<Func<InventoryItem, T>> projector,
             (Expression<Func<InventoryItem, object>> key, bool desc)? orderBy,
             CancellationToken ct)
-            {
-                IQueryable<InventoryItem> q = db.Set<InventoryItem>().AsNoTracking();
+        {
+            IQueryable<InventoryItem> q = db.Set<InventoryItem>().AsNoTracking();
 
-                if (filter is not null)
-                    q = q.Where(filter);
+            if (filter is not null)
+                q = q.Where(filter);
 
-                if (orderBy is not null)
-                    q = orderBy.Value.desc
-                        ? q.OrderByDescending(orderBy.Value.key)
-                        : q.OrderBy(orderBy.Value.key);
+            if (orderBy is not null)
+                q = orderBy.Value.desc
+                    ? q.OrderByDescending(orderBy.Value.key)
+                    : q.OrderBy(orderBy.Value.key);
 
-                return await q.Select(projector).ToListAsync(ct);
-            }
+            return await q.Select(projector).ToListAsync(ct);
+        }
     }
 
 }

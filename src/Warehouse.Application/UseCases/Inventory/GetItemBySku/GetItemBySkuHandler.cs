@@ -1,6 +1,6 @@
-﻿using Warehouse.Application.Abstractions.Inventory;
-using Warehouse.Application.Cqrs.Abstractions;
+﻿using Warehouse.Application.Cqrs.Abstractions;
 using Warehouse.Application.UseCases.Inventory.Dtos;
+using Warehouse.Domain.Abstractions.Inventory;
 using Warehouse.Domain.Inventory;
 
 namespace Warehouse.Application.UseCases.Inventory.GetItemBySku

@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Warehouse.Application.Abstractions;
-using Warehouse.Application.Abstractions.Inventory;
-using Warehouse.Infrastructure.Data;
+using Warehouse.Domain.Abstractions.Inventory;
 using Warehouse.Infrastructure.Repositories;
 
 namespace Warehouse.Infrastructure
@@ -13,7 +11,6 @@ namespace Warehouse.Infrastructure
             s.AddScoped<IInventoryWriteRepository, InventoryRepository>();
             s.AddScoped<IInventoryReadRepository, InventoryRepository>();
 
-            s.AddScoped<IUnitOfWork, EfUnitOfWork>();
             return s;
         }
     }
