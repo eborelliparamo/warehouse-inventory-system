@@ -15,8 +15,6 @@ namespace Warehouse.Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
-            services.AddScoped<IProcessor, Processor>();
-
             services.AddScoped<ICommandHandler<CreateItemCommand>, CreateItemCommandHandler>();
             services.AddScoped<ICommandHandler<RegisterIncomingStockCommand>, RegisterIncomingStockHandler>();
             services.AddScoped<ICommandHandler<RegisterOutgoingStockCommand>, RegisterOutgoingStockHandler>();
