@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Warehouse.Api.Dtos;
 using Warehouse.Api.Filters;
 using Warehouse.Application.Cqrs.Abstractions;
 using Warehouse.Application.UseCases.Inventory.CreateItem;
@@ -7,7 +7,7 @@ using Warehouse.Application.UseCases.Inventory.GetItemBySku;
 using Warehouse.Application.UseCases.Inventory.ListItems;
 using Warehouse.Application.UseCases.Inventory.RegisterIncomingStock;
 using Warehouse.Application.UseCases.Inventory.RegisterOutgoingStock;
-using Warehouse.Infrastructure.Data;
+using Warehouse.Domain.ValueObjects;
 
 namespace Warehouse.Api.Modules
 {
@@ -17,44 +17,44 @@ namespace Warehouse.Api.Modules
         {
             var grp = app.MapGroup("/items").WithTags("Inventory");
 
-            grp.MapPost("", async (CreateItemCommand req, IProcessor bus, WarehouseDbContext db) =>
+            grp.MapPost("", async (CreateItemRequest body,
+                                   ICommandHandler<CreateItemCommand> handler,
+                                   CancellationToken ct) =>
             {
-                await bus.Send(req);
-                await db.SaveChangesAsync();
-                return Results.Created($"/items/{req.Sku}", null);
-            }).AddEndpointFilter(new ValidationFilter<CreateItemCommand>());
+                await handler.Handle(new CreateItemCommand(new Sku(body.Sku), body.Name), ct);
+                return Results.Created($"/items/{body.Sku}", null);
+            });
 
-
-            grp.MapPost("/{sku}/stock-in", async (string sku, RegisterIncomingStockCommand body, IProcessor bus, WarehouseDbContext db) =>
+            grp.MapPost("/{sku}/stock-in", async (string sku, ChangeStockRequest body, ICommandHandler<RegisterIncomingStockCommand> handler, CancellationToken ct) =>
             {
-                var cmd = body with { Sku = sku };
-                await bus.Send(cmd);
-                await db.SaveChangesAsync();
+                await handler.Handle(new RegisterIncomingStockCommand(new Sku(sku), (MovementQuantity)body.Quantity), ct);
                 return Results.NoContent();
             }).AddEndpointFilter(new ValidationFilter<RegisterIncomingStockCommand>());
 
-
-            grp.MapPost("/{sku}/stock-out", async (string sku, RegisterOutgoingStockCommand body, IProcessor bus, WarehouseDbContext db) =>
+            grp.MapPost("/{sku}/stock-out", async (string sku, ChangeStockRequest body, ICommandHandler<RegisterOutgoingStockCommand> handler, CancellationToken ct) =>
             {
-                var cmd = body with { Sku = sku };
-                await bus.Send(cmd);
-                await db.SaveChangesAsync();
+                await handler.Handle(new RegisterOutgoingStockCommand(new Sku(sku), (MovementQuantity)body.Quantity), ct);
                 return Results.NoContent();
             }).AddEndpointFilter(new ValidationFilter<RegisterOutgoingStockCommand>());
 
-
-            grp.MapGet("/{sku}", async Task<Results<Ok<ItemDetailsDto>, NotFound>> (string sku, IProcessor bus) =>
+            grp.MapGet("/{sku}", async (
+                string sku,
+                IQueryHandler<GetItemBySkuQuery, ItemDetailsDto?> handler,
+                CancellationToken ct) =>
             {
-                var dto = await bus.Query<GetItemBySkuQuery, ItemDetailsDto?>(new(sku));
-                return dto is null ? TypedResults.NotFound() : TypedResults.Ok(dto);
-            });
+                var result = await handler.Handle(new GetItemBySkuQuery(new Sku(sku)), ct);
+                return result is null ? Results.NotFound() : Results.Ok(result);
+            })
+            .WithName("GetItemBySku");
 
-
-            grp.MapGet("", async (IProcessor bus) =>
+            grp.MapGet("", async (
+                IQueryHandler<ListItemsQuery, IReadOnlyList<ItemListDto>> handler,
+                CancellationToken ct) =>
             {
-                var list = await bus.Query<ListItemsQuery, IReadOnlyList<ItemListDto>>(new());
+                var list = await handler.Handle(new ListItemsQuery(), ct);
                 return Results.Ok(list);
-            });
+            })
+            .WithName("ListItems");
 
             return app;
         }

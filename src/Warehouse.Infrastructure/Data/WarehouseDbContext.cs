@@ -9,24 +9,32 @@ namespace Warehouse.Infrastructure.Data
     {
         public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder b)
         {
             var qtyConverter = new ValueConverter<InventoryQuantity, int>(
-                                toProvider => toProvider.Value,
-                                fromProvider => new InventoryQuantity(fromProvider)
-                            );
+                v => v.Value, v => new InventoryQuantity(v));
 
-            modelBuilder.HasDefaultSchema("public");
-            var e = modelBuilder.Entity<InventoryItem>();
-            e.ToTable("inventory_item");
+            var skuConverter = new ValueConverter<Sku, string>(
+                v => v.Value, v => new Sku(v));
+
+            b.HasDefaultSchema("public");
+
+            var e = b.Entity<InventoryItem>();
             e.HasKey(x => x.Id);
-            e.Property(x => x.Id).HasColumnName("id");
-            e.Property(x => x.Sku).HasColumnName("sku").IsRequired();
+
+            e.Property(x => x.Sku)
+             .HasConversion(skuConverter)
+             .IsRequired();
+
             e.HasIndex(x => x.Sku).IsUnique();
-            e.Property(x => x.Name).HasColumnName("name").IsRequired();
-            e.Property(x => x.TotalQuantity).HasColumnName("total_quantity").HasConversion(qtyConverter);
-            e.Property<DateTime>("created_at");
+
+            e.Property(x => x.Name).IsRequired();
+
+            e.Property(x => x.TotalQuantity)
+             .HasConversion(qtyConverter);
+
+            e.Property<DateTime>("CreatedAt")
+             .HasDefaultValueSql("now()");
         }
     }
 }

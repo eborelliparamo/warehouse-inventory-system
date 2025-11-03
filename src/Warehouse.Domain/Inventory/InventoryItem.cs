@@ -5,17 +5,17 @@ namespace Warehouse.Domain.Inventory
     public sealed class InventoryItem
     {
         public Guid Id { get; private set; }
-        public string Sku { get; private set; } = default!;
+        public Sku Sku { get; private set; } = default!;
         public string Name { get; private set; } = default!;
         public InventoryQuantity TotalQuantity { get; private set; } = InventoryQuantity.Zero;
 
         private InventoryItem() { }
 
-        public static InventoryItem Create(string sku, string name)
+        public static InventoryItem Create(Sku sku, string name)
         {
             if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU is required");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required");
-            return new InventoryItem { Id = Guid.NewGuid(), Sku = sku.Trim(), Name = name.Trim(), TotalQuantity = InventoryQuantity.Zero };
+            return new InventoryItem { Id = Guid.NewGuid(), Sku = sku, Name = name.Trim(), TotalQuantity = InventoryQuantity.Zero };
         }
 
         public void RegisterIncoming(MovementQuantity qty) { TotalQuantity += qty; }
