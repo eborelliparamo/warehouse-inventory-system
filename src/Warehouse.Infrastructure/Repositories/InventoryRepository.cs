@@ -3,11 +3,11 @@ using System.Linq.Expressions;
 using Warehouse.Domain.Abstractions.Inventory;
 using Warehouse.Domain.Inventory;
 using Warehouse.Domain.ValueObjects;
-using Warehouse.Infrastructure.Data;
+using Warehouse.Infrastructure.Persistence.Data;
 
 namespace Warehouse.Infrastructure.Repositories
 {
-    public sealed class InventoryRepository(WarehouseDbContext db) : IInventoryWriteRepository, IInventoryReadRepository
+    public sealed class InventoryRepository(WarehouseWriteDbContext db) : IInventoryWriteRepository, IInventoryReadRepository
     {
         public Task<InventoryItem?> GetBySkuAsync(Sku sku, CancellationToken ct)
             => db.Set<InventoryItem>().SingleOrDefaultAsync(x => x.Sku == sku, ct);

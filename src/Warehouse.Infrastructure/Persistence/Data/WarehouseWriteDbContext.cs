@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Warehouse.Domain.Inventory;
 using Warehouse.Domain.ValueObjects;
 
-namespace Warehouse.Infrastructure.Data
+namespace Warehouse.Infrastructure.Persistence.Data
 {
-    public sealed class WarehouseDbContext(DbContextOptions<WarehouseDbContext> options) : DbContext(options)
+    public sealed class WarehouseWriteDbContext(DbContextOptions<WarehouseWriteDbContext> options) : DbContext(options)
     {
         public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
@@ -20,6 +20,7 @@ namespace Warehouse.Infrastructure.Data
             b.HasDefaultSchema("public");
 
             var e = b.Entity<InventoryItem>();
+            e.ToTable("inventory_item");
             e.HasKey(x => x.Id);
 
             e.Property(x => x.Sku)
