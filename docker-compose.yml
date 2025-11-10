@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: warehouse_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      POSTGRES_DB: warehouse
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/sql:/docker-entrypoint-initdb.d:ro
+volumes:
+  pgdata:
