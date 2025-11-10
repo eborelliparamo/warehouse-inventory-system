@@ -14,9 +14,9 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 });
 
 builder.Services
-    .AddApi(builder.Configuration)
+    .AddApi()
     .AddApplication()
-    .AddInfrastructure();
+    .AddInfrastructureWrite(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>
 {

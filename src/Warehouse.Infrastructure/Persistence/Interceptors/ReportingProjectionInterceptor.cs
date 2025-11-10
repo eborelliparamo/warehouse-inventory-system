@@ -10,22 +10,24 @@ namespace Warehouse.Infrastructure.Persistence.Interceptors
     public sealed class PostCommitReadModelInterceptor : SaveChangesInterceptor
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IDomainEventCollector _events;
+        private readonly IHaveDomainEvents _events;
         private readonly ILogger<PostCommitReadModelInterceptor> _logger;
 
         public PostCommitReadModelInterceptor(
             IServiceScopeFactory scopeFactory,
-            IDomainEventCollector events,
+            IHaveDomainEvents events,
             ILogger<PostCommitReadModelInterceptor> logger)
             => (_scopeFactory, _events, _logger) = (scopeFactory, events, logger);
 
         public override async ValueTask<int> SavedChangesAsync(
             SaveChangesCompletedEventData e, int result, CancellationToken ct = default)
         {
-            if (e.Context is not WarehouseWriteDbContext) return result;
+            if (e.Context is not WarehouseWriteDbContext writeDb) return result;
 
-            var drained = _events.Drain();
-            if (drained.Count == 0) return result;
+            var domainEvents = writeDb.ChangeTracker
+                .Entries<IHaveDomainEvents>()
+                .SelectMany(en => en.Entity.DomainEvents)
+                .ToArray();
 
             try
             {
@@ -33,7 +35,7 @@ namespace Warehouse.Infrastructure.Persistence.Interceptors
                 var readDb = scope.ServiceProvider.GetRequiredService<WarehouseReadDbContext>();
                 var projectors = scope.ServiceProvider.GetRequiredService<IEventProjectors>();
 
-                foreach (var evt in drained)
+                foreach (var evt in domainEvents)
                     if (projectors.TryGet(evt.GetType(), out var handler))
                         await handler(readDb, evt, ct);
 
@@ -42,6 +44,11 @@ namespace Warehouse.Infrastructure.Persistence.Interceptors
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Read model projection failed post-commit");
+            }
+            finally
+            {
+                foreach (var entry in writeDb.ChangeTracker.Entries<IHaveDomainEvents>())
+                    entry.Entity.ClearDomainEvents();
             }
             return result;
         }

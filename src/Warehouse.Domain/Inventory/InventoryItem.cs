@@ -1,8 +1,9 @@
-﻿using Warehouse.Domain.ValueObjects;
+﻿using Warehouse.Domain.Events;
+using Warehouse.Domain.ValueObjects;
 
 namespace Warehouse.Domain.Inventory
 {
-    public sealed class InventoryItem
+    public sealed class InventoryItem : Entity
     {
         public Guid Id { get; private set; }
         public Sku Sku { get; private set; } = default!;
@@ -15,10 +16,21 @@ namespace Warehouse.Domain.Inventory
         {
             if (string.IsNullOrWhiteSpace(sku)) throw new ArgumentException("SKU is required");
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name is required");
-            return new InventoryItem { Id = Guid.NewGuid(), Sku = sku, Name = name.Trim(), TotalQuantity = InventoryQuantity.Zero };
+            var item = new InventoryItem { Id = Guid.NewGuid(), Sku = sku, Name = name.Trim(), TotalQuantity = InventoryQuantity.Zero };
+            item.Raise(new ItemCreated(sku, name, DateTime.UtcNow));
+
+            return item;
         }
 
-        public void RegisterIncoming(MovementQuantity qty) { TotalQuantity += qty; }
-        public void RegisterOutgoing(MovementQuantity qty) { TotalQuantity -= qty; }
+        public void RegisterIncoming(MovementQuantity qty)
+        {
+            TotalQuantity += qty;
+            Raise(new StockInRegistered(Sku, qty, DateTime.UtcNow));
+        }
+        public void RegisterOutgoing(MovementQuantity qty)
+        {
+            TotalQuantity -= qty;
+            Raise(new StockOutRegistered(Sku, qty, DateTime.UtcNow));
+        }
     }
 }
