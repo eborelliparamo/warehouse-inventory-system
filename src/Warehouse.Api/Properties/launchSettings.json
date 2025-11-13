@@ -8,7 +8,9 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:8081",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Warehouse": "Host=localhost;Port=5432;Database=warehouse;Username=warehouse;Password=warehouse",
+        "Rabbit__Host": "localhost"
       }
     }
   }

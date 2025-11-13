@@ -1,4 +1,5 @@
-﻿using Warehouse.Domain.Events;
+﻿using Warehouse.Domain.Common;
+using Warehouse.Domain.Events;
 using Warehouse.Domain.ValueObjects;
 
 namespace Warehouse.Domain.Inventory

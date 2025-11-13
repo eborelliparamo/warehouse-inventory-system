@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Warehouse.Domain.Events;
 
-namespace Warehouse.Domain.Events
+namespace Warehouse.Domain.Common
 {
     public abstract class Entity : IHaveDomainEvents
     {
