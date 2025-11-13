@@ -1,0 +1,18 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "Warehouse.Audit.Worker": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "ConnectionStrings__Audit": "Host=localhost;Port=5433;Database=audit;Username=audit;Password=audit",
+        "Rabbit__Host": "localhost",
+        "Rabbit__Exchange": "inventory",
+        "Rabbit__Queue": "audit.inventory",
+        "Rabbit__RoutingPattern": "inventory.*",
+        "Rabbit__Prefetch": "10"
+      }
+    }
+  }
+}

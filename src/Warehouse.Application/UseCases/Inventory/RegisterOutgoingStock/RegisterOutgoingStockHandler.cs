@@ -1,16 +1,20 @@
 ﻿using Warehouse.Application.Cqrs.Abstractions;
-using Warehouse.Domain.Abstractions.Inventory;
-using Warehouse.Infrastructure.Persistence.Data;
+using Warehouse.Domain.Common;
+using Warehouse.Domain.Inventory;
 
 namespace Warehouse.Application.UseCases.Inventory.RegisterOutgoingStock
 {
-    public sealed class RegisterOutgoingStockHandler(IInventoryWriteRepository repo, WarehouseWriteDbContext db) : ICommandHandler<RegisterOutgoingStockCommand>
+    public sealed class RegisterOutgoingStockHandler(IInventoryEventSourcedRepository repo, IUnitOfWork uow)
+        : ICommandHandler<RegisterOutgoingStockCommand>
     {
-        public async Task Handle(RegisterOutgoingStockCommand command, CancellationToken ct)
+        public async Task Handle(RegisterOutgoingStockCommand cmd, CancellationToken ct)
         {
-            var item = await repo.GetBySkuAsync(command.Sku, ct) ?? throw new KeyNotFoundException($"SKU '{command.Sku}' not found.");
-            item.RegisterOutgoing(command.Quantity);
-            await db.SaveChangesAsync(ct);
+            await uow.ExecuteAsync(async _ =>
+            {
+                var agg = await repo.GetAsync(cmd.Sku, ct);
+                agg.StockOut(cmd.Quantity);
+                await repo.SaveAsync(agg, ct);
+            }, ct);
         }
     }
 }

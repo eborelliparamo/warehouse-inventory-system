@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   db:
     image: postgres:16-alpine
@@ -8,10 +9,31 @@ services:
       POSTGRES_USER: warehouse
       POSTGRES_PASSWORD: warehouse
       POSTGRES_DB: warehouse
-    ports:
-      - "5432:5432"
+    ports: ["5432:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./deploy/sql:/docker-entrypoint-initdb.d:ro
+      - ./deploy/sql:/docker-entrypoint-initdb.d:ro 
+
+  auditdb:
+    image: postgres:16-alpine
+    container_name: audit_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: audit
+      POSTGRES_PASSWORD: audit
+      POSTGRES_DB: audit
+    ports: ["5433:5432"]
+    volumes:
+      - auditdata:/var/lib/postgresql/data
+      - ./deploy/sql/audit:/docker-entrypoint-initdb.d:ro
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: rabbit
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
 volumes:
   pgdata:
+  auditdata:

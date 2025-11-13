@@ -1,20 +1,20 @@
 ﻿using Warehouse.Application.Cqrs.Abstractions;
-using Warehouse.Domain.Abstractions.Inventory;
+using Warehouse.Domain.Common;
 using Warehouse.Domain.Inventory;
-using Warehouse.Infrastructure.Persistence.Data;
 
 namespace Warehouse.Application.UseCases.Inventory.CreateItem
 {
-    public sealed class CreateItemCommandHandler(IInventoryWriteRepository repo, WarehouseWriteDbContext db) : ICommandHandler<CreateItemCommand>
+    public sealed class CreateItemCommandHandler(IInventoryEventSourcedRepository repo, IUnitOfWork uow) : ICommandHandler<CreateItemCommand>
     {
         public async Task Handle(CreateItemCommand cmd, CancellationToken ct)
         {
-            var existing = await repo.GetBySkuAsync(cmd.Sku, ct);
-            if (existing is not null) return;
-
-            var entity = InventoryItem.CreateOrThrow(cmd.Sku, cmd.Name);
-            await repo.AddAsync(entity, ct);
-            await db.SaveChangesAsync(ct);
+            await uow.ExecuteAsync(async _ =>
+            {
+                var agg = await repo.GetAsync(cmd.Sku, ct);
+                if (agg.Version > 0) return;
+                agg = InventoryItemAggregate.CreateNew(cmd.Sku, cmd.Name, Guid.NewGuid());
+                await repo.SaveAsync(agg, ct);
+            }, ct);
         }
     }
 }

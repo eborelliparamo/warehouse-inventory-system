@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<Protobuf Include="proto\inventory_events.proto" GrpcServices="None" ProtoRoot="proto" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Google.Protobuf" Version="3.25.3" />
+		<PackageReference Include="Grpc.Tools" Version="2.60.0" PrivateAssets="All" />
+	</ItemGroup>
+</Project>

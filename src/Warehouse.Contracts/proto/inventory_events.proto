@@ -1,0 +1,18 @@
+﻿syntax = "proto3";
+package warehouse.contracts.inventory;
+import "google/protobuf/timestamp.proto";
+
+message InventoryEventEnvelope {
+  string event_type = 1;
+  string stream_id  = 2;
+  int64  version    = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+  oneof payload {
+    ItemCreated        item_created        = 10;
+    StockInRegistered  stock_in_registered = 11;
+    StockOutRegistered stock_out_registered= 12;
+  }
+}
+message ItemCreated { string sku = 1; string name = 2; }
+message StockInRegistered { string sku = 1; int32 quantity = 2; }
+message StockOutRegistered { string sku = 1; int32 quantity = 2; }
